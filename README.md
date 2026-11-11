@@ -10,7 +10,7 @@ We built an interactive time-and-depth view of recent earthquakes. We wanted vis
 
 1. Choose **Past 24 hours** or **Past 7 days** to request a USGS GeoJSON feed.
 2. Choose a **Minimum magnitude** to focus the field on M2.5+ or M4.5+ earthquakes.
-3. Select an event circle to see its place, magnitude, time, depth, and catalog status. Keyboard users can focus the event buttons and activate them with Enter or Space.
+3. Select an event circle to see its place, magnitude, time, depth, and catalog status. Use **Older** and **Newer** to browse events even where circles overlap. Use Tab to enter the field and the arrow keys to move between events.
 4. Use **Refresh feed** to request the latest available snapshot.
 
 To run the project locally, open `index.html` in a browser while connected to the internet. The site uses plain HTML, CSS, and JavaScript.
@@ -20,7 +20,7 @@ To run the project locally, open `index.html` in a browser while connected to th
 | USGS field | Visual or interactive result |
 | --- | --- |
 | `properties.time` | Horizontal position within the selected time window |
-| `geometry.coordinates[2]` | Vertical position on the depth axis and depth-based symbol color |
+| `geometry.coordinates[2]` | Vertical position on the depth axis. Amber indicates depths below 70 km, coral indicates 70 to less than 300 km, and lavender indicates 300 km and deeper. |
 | `properties.mag` | Symbol diameter and magnitude-filter inclusion |
 | `properties.place`, `magType`, `status` | The selected event's details |
 | `metadata.generated` | The displayed feed snapshot time and the right edge of the time window |
@@ -35,13 +35,12 @@ The depth scale fits the valid events in the selected time window and stays stab
 
 ## Data and interpretation
 
-We use the USGS M2.5+ [past-day feed](https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson) and [past-week feed](https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson). The [GeoJSON documentation](https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php) defines the fields and feed update cadence. Each event's own USGS page provides its source record.
+We use two USGS M2.5+ feeds. The documentation defines the fields and update cadence. Each event's own USGS page provides its source record. [Past-day feed](https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson) · [Past-week feed](https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson) · [GeoJSON documentation](https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php)
 
 The field combines worldwide events on a time-and-depth display. Catalog measurements and review status can change as USGS revises events. Detection coverage varies by region. Events with missing essential plotting values are excluded and counted in the interface.
 
 ## Credits
 
-Earthquake data and documentation by the [U.S. Geological Survey](https://earthquake.usgs.gov/). Depth references and depth reporting are explained in [USGS depth documentation](https://www.usgs.gov/faqs/what-reference-datum-used-earthquake-depths).
+The U.S. Geological Survey provides the earthquake data and explains the depth reference. [USGS Earthquake Hazards Program](https://earthquake.usgs.gov/) · [USGS depth documentation](https://www.usgs.gov/faqs/what-reference-datum-used-earthquake-depths)
 
-We use [DM Sans](https://fonts.google.com/specimen/DM+Sans) and [Instrument Serif](https://fonts.google.com/specimen/Instrument+Serif) from Google Fonts. Both use the SIL Open Font License ([DM Sans license](https://github.com/google/fonts/blob/main/ofl/dmsans/OFL.txt), [Instrument Serif license](https://github.com/google/fonts/blob/main/ofl/instrumentserif/OFL.txt)).
-
+We use DM Sans and Instrument Serif from Google Fonts. Both use the SIL Open Font License. [DM Sans license](https://github.com/google/fonts/blob/main/ofl/dmsans/OFL.txt) · [Instrument Serif license](https://github.com/google/fonts/blob/main/ofl/instrumentserif/OFL.txt)
