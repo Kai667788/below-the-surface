@@ -211,7 +211,10 @@ function handlePointKey(event) {
         return;
     }
     event.preventDefault();
-    if (nextIndex >= 0 && nextIndex < pointButtons.length) pointButtons[nextIndex].focus();
+    if (nextIndex >= 0 && nextIndex < pointButtons.length) {
+        selectEvent(nextIndex);
+        pointButtons[nextIndex].focus();
+    }
 }
 
 function drawPoint(earthquake, index) {
