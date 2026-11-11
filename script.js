@@ -237,6 +237,7 @@ function handlePointKey(event) {
     }
     event.preventDefault();
     if (nextIndex >= 0 && nextIndex < pointButtons.length) {
+        selectEvent(nextIndex);
         pointButtons[nextIndex].focus();
     }
 }

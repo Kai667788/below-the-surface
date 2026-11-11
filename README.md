@@ -45,3 +45,5 @@ The field combines worldwide events on a time-and-depth display. Catalog measure
 The U.S. Geological Survey provides the earthquake data and explains the depth reference. [USGS Earthquake Hazards Program](https://earthquake.usgs.gov/), [USGS depth documentation](https://www.usgs.gov/faqs/what-reference-datum-used-earthquake-depths)
 
 Rumble audio synthesized for this project.
+
+The interface uses DM Sans from Google Fonts under the SIL Open Font License. [DM Sans license](https://github.com/google/fonts/blob/main/ofl/dmsans/OFL.txt)
