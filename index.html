@@ -5,24 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="An interactive field of USGS-reported earthquakes shaped by time, depth, and magnitude.">
     <title>Below the Surface</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js?v=2" defer></script>
+    <link rel="stylesheet" href="styles.css?v=3">
+    <script src="script.js?v=3" defer></script>
 </head>
 <body>
-    <header class="masthead page-width">
-        <a class="wordmark" href="#main"><span class="strata-mark" aria-hidden="true"><span></span><span></span><span></span></span>Below the Surface</a>
-        <a class="about-link" href="#our-approach">Our approach <span aria-hidden="true">↘</span></a>
+    <header class="page-header page-width">
+        <h1>Below the Surface</h1>
+        <a href="#our-approach">Our approach</a>
     </header>
 
-    <main id="main" class="page-width">
-        <section class="intro" aria-labelledby="page-title">
-            <h1 id="page-title">Below the <em>Surface</em></h1>
-            <p>We turn a live earthquake feed into a field of time, depth, and magnitude. Explore recent USGS-reported earthquakes, one event at a time.</p>
-        </section>
-
+    <main class="page-width">
         <section class="explorer" aria-labelledby="explorer-title">
             <div class="explorer-controls">
-                <h2 id="explorer-title">The earthquake field</h2>
+                <h2 id="explorer-title">Earthquake field</h2>
                 <div class="controls">
                     <div class="control-field">
                         <label for="period">Time window</label>
@@ -32,7 +27,7 @@
                         <label for="magnitude-filter">Minimum magnitude</label>
                         <select id="magnitude-filter"><option value="2.5">M 2.5+</option><option value="4.5">M 4.5+</option></select>
                     </div>
-                    <button id="refresh" class="refresh-button" type="button"><span aria-hidden="true">↻</span> Refresh feed</button>
+                    <button id="refresh" class="refresh-button" type="button">Refresh feed</button>
                 </div>
             </div>
 
@@ -48,10 +43,6 @@
                     <div class="chart">
                         <div id="depth-axis" class="depth-axis" aria-hidden="true"></div>
                         <div id="plot" class="plot" role="group" aria-label="Earthquakes positioned by occurrence time and catalog depth">
-                            <div class="depth-band band-one" aria-hidden="true"></div>
-                            <div class="depth-band band-two" aria-hidden="true"></div>
-                            <div class="depth-band band-three" aria-hidden="true"></div>
-                            <div class="depth-band band-four" aria-hidden="true"></div>
                             <div id="surface-line" class="surface-line" aria-hidden="true"><span>0 km reference</span></div>
                             <div id="grid-lines" class="grid-lines" aria-hidden="true"></div>
                             <div id="points" class="points"></div>
@@ -59,7 +50,7 @@
                         </div>
                         <div class="time-axis" aria-hidden="true"><span id="time-start">24 h ago</span><span id="time-middle">12 h ago</span><span>Feed snapshot</span></div>
                     </div>
-                    <p class="plot-instruction">Time runs left to right. Select a circle, or Tab into the field and use the arrow keys, to inspect an event.</p>
+                    <p class="plot-instruction">Click or press Enter on a circle to hear a rumble. Use arrow keys to browse.</p>
                 </div>
 
                 <aside class="event-detail" aria-labelledby="detail-title">
@@ -72,38 +63,32 @@
                         <div><dt>Catalog status</dt><dd id="event-status">—</dd></div>
                     </dl>
                     <p id="negative-depth-note" class="negative-depth-note" hidden>USGS reports a negative depth for this event, above its catalog depth reference.</p>
-                    <a id="event-link" class="event-link" href="https://earthquake.usgs.gov/earthquakes/" target="_blank" rel="noopener noreferrer" hidden>Open this event at USGS <span aria-hidden="true">↗</span></a>
+                    <a id="event-link" class="event-link" href="https://earthquake.usgs.gov/earthquakes/" target="_blank" rel="noopener noreferrer" hidden>Open this event at USGS</a>
                     <div class="event-navigation" role="group" aria-label="Browse earthquakes in order of occurrence">
-                        <button id="older-event" type="button" disabled>← Older</button>
+                        <button id="older-event" type="button" disabled>Older</button>
                         <span id="event-position">—</span>
-                        <button id="newer-event" type="button" disabled>Newer →</button>
+                        <button id="newer-event" type="button" disabled>Newer</button>
                     </div>
                     <p id="selection-update" class="screen-reader-text" role="status"></p>
                 </aside>
             </div>
 
-            <div class="legend">
+            <div id="our-approach" class="legend" role="group" aria-label="Our approach to size and color">
                 <div class="size-legend"><span class="legend-title">Magnitude / size</span><span class="size-key"><i class="size-small" aria-hidden="true"></i>M 2.5</span><span class="size-key"><i class="size-medium" aria-hidden="true"></i>M 4.5</span><span class="size-key"><i class="size-large" aria-hidden="true"></i>M 6.5</span></div>
                 <div class="color-legend"><span class="legend-title">Depth / color</span><span><i class="color-shallow" aria-hidden="true"></i>&lt;70 km</span><span><i class="color-middle" aria-hidden="true"></i>70–&lt;300 km</span><span><i class="color-deep" aria-hidden="true"></i>300 km+</span></div>
             </div>
-            <p id="data-status" class="data-status" role="status">Connecting to the USGS GeoJSON feed…</p>
-            <p id="data-note" class="data-note"></p>
+            <p id="data-status" class="data-status screen-reader-text" role="status">Connecting to the USGS GeoJSON feed…</p>
+            <p id="data-note" class="screen-reader-text"></p>
         </section>
 
-        <section id="our-approach" class="our-approach" aria-labelledby="approach-title">
-            <h2 id="approach-title">Our approach</h2>
-            <div>
-                <p>We use occurrence time to position each earthquake horizontally and catalog depth to place it vertically. Magnitude sets circle size. Depth also changes circle color, so the data shapes the field as we explore it.</p>
-                <p>We fit the depth scale to the full time window and keep that scale while changing the magnitude filter. Negative catalog depths appear above the 0 km reference. Depth shading is illustrative, and point overlaps can hide events.</p>
-                <p>Our data comes from USGS M 2.5+ summary feeds. We request the latest snapshot when the page opens, when we change the time window, and when we select Refresh feed. Coverage varies by location, and USGS can revise these estimates.</p>
-            </div>
-        </section>
         <noscript><p class="noscript">Enable JavaScript to load and explore the earthquake field.</p></noscript>
+        <audio id="quake-audio" src="rumble.wav" preload="auto"></audio>
     </main>
 
     <footer class="page-width footer">
-        <p>Kevin and Michael · CCT 360 · Designing With Data</p>
+        <p>Kevin and Michael, CCT 360, Designing With Data</p>
         <p>Data from <a href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php">USGS Earthquake Hazards Program</a></p>
+        <p>Rumble audio synthesized for this project.</p>
     </footer>
 </body>
 </html>

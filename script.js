@@ -33,6 +33,7 @@ const olderButton = document.querySelector('#older-event');
 const newerButton = document.querySelector('#newer-event');
 const eventPosition = document.querySelector('#event-position');
 const selectionUpdate = document.querySelector('#selection-update');
+const quakeAudio = document.querySelector('#quake-audio');
 
 let feed = null;
 let visibleEvents = [];
@@ -43,7 +44,7 @@ let requestNumber = 0;
 function utcLabel(time) {
     // GeoJSON supplies milliseconds since the Unix epoch.
     const date = new Date(time).toISOString();
-    return `${date.slice(0, 10)} · ${date.slice(11, 16)}`;
+    return `${date.slice(0, 10)} ${date.slice(11, 16)}`;
 }
 
 function validTimestamp(time) {
@@ -117,12 +118,12 @@ function processFeed(data, period) {
     return { period: period, startTime: startTime, endTime: endTime, events: events, omitted: omitted, topDepth: topDepth, bottomDepth: bottomDepth };
 }
 
-function depthPosition(depth, top, bottom) {
-    return (depth - top) / (bottom - top) * 100;
+function positionPercent(value, start, end) {
+    return (value - start) / (end - start) * 100;
 }
 
 function addDepthTick(depth, top, bottom, showLabel) {
-    const position = `${depthPosition(depth, top, bottom)}%`;
+    const position = `${positionPercent(depth, top, bottom)}%`;
     const line = document.createElement('div');
     line.className = 'grid-line';
     line.style.top = position;
@@ -140,27 +141,30 @@ function addDepthTick(depth, top, bottom, showLabel) {
 function drawDepthScale(top, bottom) {
     gridLines.textContent = '';
     depthAxis.textContent = '';
-    surfaceLine.style.top = `${depthPosition(0, top, bottom)}%`;
+    const zeroPosition = positionPercent(0, top, bottom);
+    surfaceLine.style.top = `${zeroPosition}%`;
 
     if (top < 0) addDepthTick(top, top, bottom, true);
     for (let i = 0; i <= 4; i++) {
         const depth = bottom * i / 4;
         // At shallow negative values the line still labels zero inside the plot.
-        const showLabel = depth > 0 || top === 0 || depthPosition(0, top, bottom) >= 7;
+        const showLabel = depth > 0 || top === 0 || zeroPosition >= 7;
         addDepthTick(depth, top, bottom, showLabel);
     }
 }
 
 function renderDetails(earthquake) {
-    detailMagnitude.textContent = '—';
-    magnitudeType.textContent = '';
-    eventPlace.textContent = 'Choose an event in the field';
-    eventDepth.textContent = '—';
-    eventTime.textContent = '—';
-    eventStatus.textContent = '—';
-    negativeDepthNote.hidden = true;
     eventLink.hidden = true;
-    if (!earthquake) return;
+    if (!earthquake) {
+        detailMagnitude.textContent = '—';
+        magnitudeType.textContent = '';
+        eventPlace.textContent = 'Choose an event in the field';
+        eventDepth.textContent = '—';
+        eventTime.textContent = '—';
+        eventStatus.textContent = '—';
+        negativeDepthNote.hidden = true;
+        return;
+    }
 
     detailMagnitude.textContent = `M ${earthquake.magnitude}`;
     magnitudeType.textContent = earthquake.magnitudeType || '';
@@ -197,6 +201,27 @@ function selectPoint(event) {
     selectEvent(Number(event.currentTarget.value));
 }
 
+function playRumble(magnitude) {
+    quakeAudio.currentTime = 0;
+    quakeAudio.volume = Math.min(0.8, magnitude / 10);
+    quakeAudio.playbackRate = Math.min(1.5, 0.5 + magnitude / 10);
+    quakeAudio.play().catch(function () {
+        // The plot still works if sound cannot play.
+    });
+}
+
+function activatePoint(event) {
+    const point = event.currentTarget;
+    const index = Number(point.value);
+    selectEvent(index);
+
+    point.classList.remove('shaking');
+    // Measure the point so the browser applies the class removal before restarting the shake.
+    point.getBoundingClientRect();
+    point.classList.add('shaking');
+    playRumble(visibleEvents[index].magnitude);
+}
+
 function handlePointKey(event) {
     let nextIndex = selectedIndex;
     if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
@@ -212,7 +237,6 @@ function handlePointKey(event) {
     }
     event.preventDefault();
     if (nextIndex >= 0 && nextIndex < pointButtons.length) {
-        selectEvent(nextIndex);
         pointButtons[nextIndex].focus();
     }
 }
@@ -234,13 +258,19 @@ function drawPoint(earthquake, index) {
     point.setAttribute('aria-label', label);
     point.title = label;
 
-    const timePosition = (earthquake.time - feed.startTime) / (feed.endTime - feed.startTime) * 100;
+    const timePosition = positionPercent(earthquake.time, feed.startTime, feed.endTime);
     const diameter = 9 + 4 * earthquake.magnitude;
+    const shakeDistance = Math.min(14, earthquake.magnitude * 2);
     point.style.left = `${timePosition}%`;
-    point.style.top = `${depthPosition(earthquake.depth, feed.topDepth, feed.bottomDepth)}%`;
+    point.style.top = `${positionPercent(earthquake.depth, feed.topDepth, feed.bottomDepth)}%`;
     point.style.width = `${diameter}px`;
     point.style.height = `${diameter}px`;
-    point.addEventListener('click', selectPoint);
+    point.style.setProperty('--shake-distance', `${shakeDistance}px`);
+    point.classList.add('shaking');
+    point.addEventListener('animationend', function () {
+        point.classList.remove('shaking');
+    });
+    point.addEventListener('click', activatePoint);
     point.addEventListener('focus', selectPoint);
     point.addEventListener('keydown', handlePointKey);
     points.appendChild(point);
@@ -326,7 +356,7 @@ async function loadFeed() {
     timeStart.textContent = windowDetails.start;
     timeMiddle.textContent = windowDetails.middle;
     refreshButton.disabled = true;
-    statusText.className = 'data-status';
+    statusText.className = 'data-status screen-reader-text';
     statusText.textContent = `Loading USGS data for ${windowDetails.label}…`;
 
     try {
